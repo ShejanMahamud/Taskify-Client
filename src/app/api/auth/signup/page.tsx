@@ -32,7 +32,15 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) =>  {
     const terms = form.terms.checked;
 
     const formData: SignUpProps = {firstName,lastName,userName,email,password,confirmPassword,terms}
-    console.log(formData)
+    
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER}/api/auth/signup/api`,{
+      method: 'POST',
+      headers: {
+        "content-type": 'application/json',
+      },
+      body: JSON.stringify(formData)
+    })
+    console.log(res)
   }
   catch(error: any){
     console.log(error.message)

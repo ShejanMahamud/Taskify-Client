@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import NextUIWrapper from "./components/NextUIWrapper";
+import AuthProvider from "@/services/AuthProvider";
+import NextUIWrapper from "@/components/NextUIWrapper";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,9 +18,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${inter.className} w-full bg-[url(/gradient-bg.png)] min-h-screen`}>
         <NextUIWrapper>
-        {children}
+          <AuthProvider>
+          {children}
+          </AuthProvider>
         </NextUIWrapper>
         </body>
     </html>
