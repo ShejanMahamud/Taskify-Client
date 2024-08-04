@@ -2,8 +2,10 @@
 import React, { useState } from 'react'
 import { PiEnvelopeSimpleLight } from 'react-icons/pi'
 import { FiEye, FiEyeOff, FiKey, FiUser } from "react-icons/fi";
-import { Button, Checkbox } from '@nextui-org/react';
+import { Avatar, Button, Checkbox, Select, SelectItem } from '@nextui-org/react';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
+import { redirect } from 'next/navigation';
 
 interface SignUpProps {
   firstName: string;
@@ -11,8 +13,7 @@ interface SignUpProps {
   userName: string;
   email: string;
   password: string;
-  confirmPassword: string;
-  terms: boolean;
+  role: string;
 }
 
 const SignUp = () => {
@@ -29,9 +30,17 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) =>  {
     const email = form.email.value;
     const password = form.password.value;
     const confirmPassword = form.confirmPassword.value;
+    const role = form.role.value;
     const terms = form.terms.checked;
+    const strongPasswordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{6,}$/;
 
-    const formData: SignUpProps = {firstName,lastName,userName,email,password,confirmPassword,terms}
+    if(!terms) return toast.error('Please accept terms of services!')
+      
+    if(password !== confirmPassword) return toast.error('Pasword not matched!')
+    
+    if(!strongPasswordRegex.test(password)) return toast.error('Please use strong password!')
+
+    const formData: SignUpProps = {firstName,lastName,userName,email,password,role}
     
     const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER}/api/auth/signup/api`,{
       method: 'POST',
@@ -40,7 +49,17 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) =>  {
       },
       body: JSON.stringify(formData)
     })
-    console.log(res)
+    const data = await res.json()
+
+    if(data.success) {
+      toast.success('Successfully Registered!')
+      setTimeout(() => {
+        redirect('/signin')
+      }, 1000);
+      form.reset()
+      return
+    }
+    if(!data.success) return toast.error('Something Went Wrong!')
   }
   catch(error: any){
     console.log(error.message)
@@ -82,6 +101,16 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) =>  {
               !showConfirmPassword ? <FiEye onClick={()=>setShowConfirmPassword(true)} className='cursor-pointer'/> : <FiEyeOff onClick={()=>setShowConfirmPassword(false)} className='cursor-pointer'/>
             }
             </div>
+            <div className='py-3 px-5 rounded-lg border border-white border-opacity-40 w-full backdrop-blur-lg flex items-center gap-3 text-sm justify-between'>
+            <FiUser className='text-lg'/>
+            {/* <input type="email" required name='email' placeholder='Email' className='w-full focus:outline-none bg-transparent placeholder:text-sm'/> */}
+            <select name='role' className='bg-transparent focus:outline-none w-full'>
+              <option selected disabled value="" className='bg-violet-900 text-white hover:bg-red-600 py-2 px-2 rounded-lg font-medium'>Select Role</option>
+              <option value="lead" className='bg-violet-900 text-white hover:bg-red-600 py-2 px-2 rounded-lg font-medium'>Team Lead</option>
+              <option value="player" className='bg-violet-900 text-white hover:bg-red-600 py-2 px-2 rounded-lg font-medium'>Team Player</option>
+            </select>
+            </div>
+            <div></div>
             <div className='flex items-center gap-3'>
             <Checkbox required color="secondary" name='terms'/>
             <h1>Did you accept out terms & conditions?</h1>
@@ -91,7 +120,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) =>  {
       </Button> 
           </form>  
           <h1 className='text-end w-full mt-5'>Already have an account? 
-            <Link href={'/signin'}><span className='text-violet-700 font-medium duration-500 hover:underline underline-offset-4'> Login Here</span></Link>
+            <Link href={'/api/auth/signin'}><span className='text-violet-700 font-medium duration-500 hover:underline underline-offset-4'> Login Here</span></Link>
           </h1>
         </div>
     </div>

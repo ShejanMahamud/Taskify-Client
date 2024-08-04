@@ -6,14 +6,12 @@ import { Button } from '@nextui-org/react';
 import { FcGoogle } from 'react-icons/fc';
 import { FaFacebook, FaGithub, FaXTwitter } from 'react-icons/fa6';
 import Link from 'next/link';
-
-interface SignInProps {
-  email: string;
-  password: string;
-}
+import { signIn } from 'next-auth/react';
+import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 const SignIn = () => {
-
+const router = useRouter()
 const [showPassword, setShowPassword] = useState<boolean>(false);
 
 const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -24,10 +22,18 @@ const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     const email = form.email.value;
     const password = form.password.value;
 
-    const formData: SignInProps = {email,password}
+    const res:any = await signIn("credentials",{
+      email,password,redirect: false
+    })
+    if(res.status === 200){
+      toast.success('Successfully Logged In!')
+      router.push('/')
+      return;
+    }
+    if(res.status !== 200) return toast.error('Someething Went Wrong!')
   }
   catch(error: any){
-    console.log(error.message)
+    toast.error(error.message)
   }
 }
 

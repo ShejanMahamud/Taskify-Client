@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/services/AuthProvider";
 import NextUIWrapper from "@/components/NextUIWrapper";
+import { Toaster } from "react-hot-toast";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,11 +19,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} w-full bg-[url(/gradient-bg.png)] min-h-screen`}>
+      <body className={`${inter.className} w-full bg-[url(/gradient-bg.png)] min-h-screen dark`}>
         <NextUIWrapper>
           <AuthProvider>
           {children}
           </AuthProvider>
+          <Toaster
+  position="top-right"
+  reverseOrder={true}
+/>
         </NextUIWrapper>
         </body>
     </html>

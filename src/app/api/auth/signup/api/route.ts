@@ -1,39 +1,47 @@
+import { NextResponse } from 'next/server';
 import connectDB from "@/lib/connectDB";
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcrypt';
 
 interface UserProps {
-    firstName: string;
-    lastName: string;
-    userName: string;
-    email: string;
-    password: string;
+  firstName: string;
+  lastName: string;
+  userName: string;
+  email: string;
+  password: string;
+  role: string
 }
 
-export const POST = async (request:any) => {
-    console.log(request)
-    try{
-        const user = await request.json();
-        const hashedPass = bcrypt.hashSync(user.password, 20);
-        const db = await connectDB();
-        const usersCollection = db.collection('users');
-        const isExist = await usersCollection.findOne({email: user.email})
-        if (isExist) return Response.json({
-            success: false,
-            message: 'User Already Exist',
-            status: 304
-        })
-        const res = await usersCollection.insertOne({...user,password: hashedPass})
-        Response.json({
-            success: true,
-            message: 'User Created Successfully!',
-            status: 200
-        })
+export const POST = async (request: any) => {
+  try {
+    const user: UserProps = await request.json();
+
+    const hashedPass = bcrypt.hashSync(user.password, 10);
+
+    const db = await connectDB();
+
+    const usersCollection = db.collection('users');
+
+    const isExist = await usersCollection.findOne({ email: user.email });
+    if (isExist) {
+      return NextResponse.json({
+        success: false,
+        message: 'User Already Exists',
+        status: 304
+      });
     }
-    catch(error:any){
-      return Response.json({
-            success: false,
-            error: error.message,
-            status: 500
-        })
-    }
-}
+
+    const res = await usersCollection.insertOne({ ...user, password: hashedPass });
+
+    return NextResponse.json({
+      success: true,
+      message: 'User Created Successfully!',
+      status: 201 
+    });
+  } catch (error: any) {
+    return NextResponse.json({
+      success: false,
+      error: error.message,
+      status: 500
+    });
+  }
+};
