@@ -56,7 +56,6 @@ providers: [
 callbacks: {
     async jwt ({token,account,user}) {
         if(account && user){
-            token.name = user.name;
             token.role = (user as User).role;
         }
         return token
@@ -64,7 +63,6 @@ callbacks: {
     async session({ session, token }) {
         if (session.user) {
           session.user.role = token.role;
-          session.user.name = token.name;
         }
         return session;
       },
